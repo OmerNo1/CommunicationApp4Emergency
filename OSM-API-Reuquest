@@ -1,0 +1,75 @@
+//API OpenStreetMap Request
+1.	Map Tiles:
+•	OSM Tile Server for Israel: https://tile.openstreetmap.org/{z}/{x}/{y}.png //replace {z}, {x}, and {y} with the zoom level and tile coordinates to fetch map tiles.
+2.	Geocoding:
+•	Nominatim Geocoding API: https://nominatim.openstreetmap.org/search?format=json&q=YOUR_QUERY&countrycodes=IL //Replace YOUR_QUERY with the address or location you want to geocode. This API allows you to convert addresses into geographic coordinates and vice versa. Make sure to respect usage policies and rate limits.
+Example: https://nominatim.openstreetmap.org/search?format=json&q=10+Rothschild+Boulevard, Tel+Aviv, Israel&countrycodes=IL
+
+
+
+//Full API function example
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.Scanner;
+
+public class GeocodingExample {
+    public static void main(String[] args) {
+        // Example usage: Geocode an address
+        String addressToGeocode = "1600 Amphitheatre Parkway, Mountain View, CA"; // Replace with the address you want to geocode
+
+        String jsonResponse = geocodeAddress(addressToGeocode);
+
+        // Process and use the jsonResponse as needed
+        System.out.println("JSON Response: " + jsonResponse);
+    }
+
+    public static String geocodeAddress(String address) {
+        // Define the URL
+        String baseUrl = "https://nominatim.openstreetmap.org/search";
+        String countryCodes = "IL"; // Change to the desired country code if needed
+
+        // Build the URL with query parameters
+        String fullUrl = baseUrl + "?format=json&q=" + address + "&countrycodes=" + countryCodes;
+
+        try {
+            // Create a URL object
+            URL url = new URL(fullUrl);
+
+            // Open a connection to the URL
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+
+            // Set the request method to GET
+            conn.setRequestMethod("GET");
+
+            // Get the response code
+            int responseCode = conn.getResponseCode();
+
+            if (responseCode == 200) {
+                // Read the response data
+                Scanner scanner = new Scanner(conn.getInputStream());
+                StringBuilder response = new StringBuilder();
+
+                while (scanner.hasNextLine()) {
+                    response.append(scanner.nextLine());
+                }
+
+                // Close the scanner
+                scanner.close();
+
+                // Parse the JSON response
+                return response.toString();
+            } else {
+                System.out.println("Request failed with status code: " + responseCode);
+            }
+
+            // Close the connection
+            conn.disconnect();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+}
+
